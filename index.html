@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EcoSort AI — Smart Waste Segregation Assistant</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --forest: #2C5F2D;
+    --forest-deep: #1F4520;
+    --moss: #97BC62;
+    --moss-soft: #C6DDA4;
+    --cream: #F6F5F0;
+    --paper: #FFFFFF;
+    --ink: #1F2A1A;
+    --ink-soft: #55624C;
+    --amber: #C97A2B;
+    --line: #DDE3D2;
+    --shadow: rgba(31, 42, 26, 0.08);
+    --font-head: 'Fraunces', Georgia, serif;
+    --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  :root:not([data-theme="light"]) {
+    @media (prefers-color-scheme: dark) {
+      --cream: #14200F;
+      --paper: #1B2A16;
+      --ink: #EDF2E6;
+      --ink-soft: #A9BC9C;
+      --line: #2C3D25;
+      --shadow: rgba(0, 0, 0, 0.35);
+    }
+  }
+  :root[data-theme="dark"] {
+    --cream: #14200F;
+    --paper: #1B2A16;
+    --ink: #EDF2E6;
+    --ink-soft: #A9BC9C;
+    --line: #2C3D25;
+    --shadow: rgba(0, 0, 0, 0.35);
+  }
+
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0; height: 100%;
+    background: var(--cream);
+    color: var(--ink);
+    font-family: var(--font-body);
+  }
+  body {
+    display: flex;
+    min-height: 100vh;
+  }
+
+  .layout {
+    display: flex;
+    width: 100%;
+    min-height: 100vh;
+  }
+
+  /* ---------- Sidebar ---------- */
+  .sidebar {
+    width: 340px;
+    flex-shrink: 0;
+    background: var(--forest);
+    color: #F2F7EC;
+    padding: 2.2rem 1.9rem;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+  }
+  .sidebar::after {
+    content: "";
+    position: absolute;
+    width: 260px; height: 260px;
+    border-radius: 50%;
+    background: rgba(151, 188, 98, 0.16);
+    bottom: -120px; left: -90px;
+    pointer-events: none;
+  }
+  .brand-mark {
+    font-size: 2.1rem;
+    line-height: 1;
+    margin-bottom: 0.9rem;
+  }
+  .brand-name {
+    font-family: var(--font-head);
+    font-size: 1.9rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin: 0 0 0.4rem 0;
+  }
+  .brand-tag {
+    font-size: 0.95rem;
+    color: var(--moss-soft);
+    line-height: 1.5;
+    margin: 0 0 1.8rem 0;
+    max-width: 25ch;
+  }
+
+  .sdg-row { display: flex; gap: 0.5rem; margin-bottom: 2rem; flex-wrap: wrap; }
+  .sdg-pill {
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 0.32rem 0.65rem;
+    border-radius: 100px;
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.2);
+  }
+
+  .how-it-works {
+    background: rgba(0,0,0,0.14);
+    border-radius: 14px;
+    padding: 1.2rem 1.2rem 1.3rem;
+    margin-bottom: 1.6rem;
+  }
+  .how-it-works h3 {
+    font-family: var(--font-head);
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0 0 0.8rem 0;
+  }
+  .step-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.65rem; }
+  .step-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    font-size: 0.83rem;
+    color: #DCE9CE;
+    line-height: 1.4;
+  }
+  .step-num {
+    flex-shrink: 0;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: var(--moss);
+    color: var(--forest-deep);
+    font-size: 0.72rem;
+    font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    margin-top: 0.05rem;
+  }
+
+  .responsible-note {
+    margin-top: auto;
+    padding-top: 1.2rem;
+    border-top: 1px solid rgba(255,255,255,0.16);
+    font-size: 0.78rem;
+    color: #C9DAB6;
+    line-height: 1.55;
+  }
+  .responsible-note strong { color: #F2F7EC; }
+
+  /* ---------- Chat panel ---------- */
+  .chat-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    background: var(--cream);
+  }
+  .chat-header {
+    padding: 1.3rem 2rem;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .chat-header h1 {
+    font-family: var(--font-head);
+    font-size: 1.15rem;
+    font-weight: 600;
+    margin: 0;
+  }
+  .status-dot {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.78rem;
+    color: var(--ink-soft);
+  }
+  .status-dot::before {
+    content: "";
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--moss);
+  }
+
+  .messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.6rem 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+  }
+
+  .msg { max-width: 62%; display: flex; flex-direction: column; gap: 0.35rem; }
+  .msg.user { align-self: flex-end; align-items: flex-end; }
+  .msg.bot { align-self: flex-start; align-items: flex-start; }
+
+  .bubble {
+    padding: 0.75rem 1rem;
+    border-radius: 16px;
+    font-size: 0.94rem;
+    line-height: 1.5;
+  }
+  .msg.user .bubble {
+    background: var(--forest);
+    color: #F2F7EC;
+    border-bottom-right-radius: 4px;
+  }
+  .msg.bot .bubble {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    color: var(--ink);
+    border-bottom-left-radius: 4px;
+    box-shadow: 0 1px 3px var(--shadow);
+  }
+
+  .cat-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 0.3rem 0.6rem;
+    border-radius: 8px;
+    margin-bottom: 0.55rem;
+  }
+  .cat-wet { background: #EAF3DC; color: #4B6B2B; }
+  .cat-recyclable { background: #DCEFF0; color: #1E6E73; }
+  .cat-dry { background: #F1EEE4; color: #7A6A45; }
+  .cat-hazardous { background: #FBE7DD; color: #A3441B; }
+  .cat-ewaste { background: #E7E4F5; color: #4B3E90; }
+  .cat-ai { background: #EDE7F6; color: #4B2E83; }
+
+  .ask-ai-btn {
+    margin-top: 0.6rem;
+    font-family: var(--font-body);
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 0.4rem 0.75rem;
+    border-radius: 8px;
+    border: 1px solid var(--moss);
+    background: transparent;
+    color: var(--forest);
+    cursor: pointer;
+  }
+  .ask-ai-btn:hover { background: var(--moss-soft); }
+  .ask-ai-btn:disabled { opacity: 0.5; cursor: default; }
+
+  .ai-thinking {
+    font-size: 0.82rem;
+    color: var(--ink-soft);
+    font-style: italic;
+  }
+
+  .reason {
+    display: block;
+    margin-top: 0.5rem;
+    font-size: 0.82rem;
+    color: var(--ink-soft);
+    font-style: italic;
+  }
+
+  .chips {
+    padding: 0 2rem 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .chip {
+    font-size: 0.8rem;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    color: var(--ink-soft);
+    padding: 0.45rem 0.85rem;
+    border-radius: 100px;
+    cursor: pointer;
+    transition: border-color 0.15s ease, color 0.15s ease;
+  }
+  .chip:hover { border-color: var(--moss); color: var(--forest); }
+
+  .input-row {
+    display: flex;
+    gap: 0.7rem;
+    padding: 1.1rem 2rem 1.6rem;
+    border-top: 1px solid var(--line);
+    background: var(--cream);
+  }
+  .input-row input {
+    flex: 1;
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    padding: 0.85rem 1.1rem;
+    border-radius: 12px;
+    border: 1px solid var(--line);
+    background: var(--paper);
+    color: var(--ink);
+    outline: none;
+  }
+  .input-row input:focus { border-color: var(--moss); }
+  .input-row button {
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 0.92rem;
+    padding: 0.85rem 1.4rem;
+    border-radius: 12px;
+    border: none;
+    background: var(--forest);
+    color: #F2F7EC;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+  .input-row button:hover { background: var(--forest-deep); }
+  .input-row button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .photo-btn {
+    flex: 0 0 auto;
+    font-size: 1.1rem;
+    padding: 0.7rem 0.9rem !important;
+    background: var(--paper) !important;
+    border: 1px solid var(--line) !important;
+    border-radius: 12px;
+    cursor: pointer;
+  }
+  .photo-btn:hover { border-color: var(--moss) !important; }
+
+  .msg-thumb {
+    max-width: 220px;
+    border-radius: 12px;
+    display: block;
+    margin-top: 0.4rem;
+  }
+
+  @media (max-width: 780px) {
+    .layout { flex-direction: column; }
+    .sidebar { width: 100%; padding: 1.6rem 1.4rem; }
+    .how-it-works { display: none; }
+    .msg { max-width: 85%; }
+    .chat-header, .messages, .chips, .input-row { padding-left: 1.2rem; padding-right: 1.2rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="brand-mark">♻️</div>
+    <h1 class="brand-name">EcoSort AI</h1>
+    <p class="brand-tag">Describe an item — or snap a photo — and get instant, transparent waste-segregation guidance.</p>
+
+    <div class="sdg-row">
+      <span class="sdg-pill">SDG 12 · Responsible Consumption</span>
+      <span class="sdg-pill">SDG 11 · Sustainable Cities</span>
+    </div>
+
+    <div class="sdg-row" id="featureRow">
+      <span class="sdg-pill">📷 Photo recognition</span>
+      <span class="sdg-pill">🔎 RAG-grounded</span>
+      <span class="sdg-pill">🤖 Agentic tool use</span>
+    </div>
+
+    <div class="how-it-works">
+      <h3>How it works</h3>
+      <ul class="step-list">
+        <li><span class="step-num">1</span> A fast rule engine handles common items instantly, in-browser</li>
+        <li><span class="step-num">2</span> Unmatched items trigger AI: relevant known examples are retrieved (RAG) and passed as grounding context</li>
+        <li><span class="step-num">3</span> The AI can call a tool to look up practical disposal next-steps (agentic)</li>
+        <li><span class="step-num">4</span> Photos are analyzed directly with the same classification logic</li>
+        <li><span class="step-num">5</span> Never a guess — uncertainty is always flagged honestly</li>
+      </ul>
+    </div>
+
+    <div class="responsible-note">
+      <strong>Responsible by design.</strong> The rule engine runs entirely in your browser — most items are classified with zero data leaving your device. Only "Ask AI" or a photo upload sends data to Claude for a live answer. Built for the 1M1B AI for Sustainability Virtual Internship.
+    </div>
+  </aside>
+
+  <main class="chat-panel">
+    <div class="chat-header">
+      <h1>Waste Segregation Chat</h1>
+      <span class="status-dot">Ready</span>
+    </div>
+
+    <div class="messages" id="messages"></div>
+
+    <div class="chips" id="chips"></div>
+
+    <form class="input-row" id="inputRow">
+      <button type="button" id="photoBtn" class="photo-btn" title="Analyze a photo instead" hidden>📷</button>
+      <input type="file" id="photoInput" accept="image/*" hidden />
+      <input type="text" id="itemInput" placeholder="e.g. old cooking oil, chip packet, phone charger…" autocomplete="off" />
+      <button type="submit" id="sendBtn">Ask</button>
+    </form>
+  </main>
+</div>
+
+<script>
+(function() {
+  // Priority order matters: hazardous & e-waste are specific and checked first,
+  // then packaging/material words (so "chocolate wrapper" -> dry, not wet),
+  // then the broad food list (so "chocolate" alone -> wet/organic),
+  // then a generic material fallback as a last resort before "not sure".
+  const RULES = [
+    {
+      category: "hazardous",
+      label: "Hazardous",
+      keywords: ["battery","batteries","paint","chemical","pesticide","weedicide","medicine","medicines","tablet strip","expired drug","expired medicine","cooking oil","used oil","engine oil","bulb","cfl","led bulb","tube light","tubelight","aerosol","spray can","cleaning chemical","detergent","bleach","insecticide","thinner","solvent","nail polish","polish remover","syringe","needle","thermometer","mercury","lighter","gas cylinder","firecracker"],
+      bin: "Take to a hazardous-waste collection point — never a regular bin.",
+      reason: "Contains substances that contaminate soil and water if landfilled or poured down drains."
+    },
+    {
+      category: "ewaste",
+      label: "E-waste",
+      keywords: ["phone","mobile","charger","cable","wire","laptop","computer","keyboard","mouse","remote","earphone","earbud","headphone","tv","television","adapter","circuit","electronic","appliance","router","modem","hard disk","pendrive","usb","speaker","camera","watch","smartwatch","calculator","printer","toy with battery","power bank","fan","iron box","mixer","grinder","microwave"],
+      bin: "Drop at an authorised e-waste collection center or electronics store take-back.",
+      reason: "Contains metals and chemicals that leach into soil and groundwater if landfilled."
+    },
+    {
+      category: "recyclable",
+      label: "Recyclable",
+      keywords: ["paper","cardboard","newspaper","plastic bottle","water bottle","glass bottle","glass jar","metal can","aluminium","aluminum","tin can","steel can","magazine","book","notebook","carton","milk carton","egg carton","cardboard box"],
+      bin: "Dry recyclable bin — rinse and flatten if possible.",
+      reason: "Clean, single-material items can be reprocessed into new products, reducing raw material use."
+    },
+    {
+      category: "dry",
+      label: "Dry (low recyclability)",
+      keywords: ["wrapper","chip packet","chips packet","biscuit packet","foil","pouch","sachet","milk packet","styrofoam","thermocol","multilayer","multi-layer","tissue","napkin","paper towel","sanitary pad","diaper","cigarette","cigarette butt","straw","toothbrush","pen","rubber","plastic bag","polythene","plastic cover","plastic cup","plastic plate","disposable cup","disposable plate","gift wrap","bubble wrap","thermocole"],
+      bin: "General dry waste bin.",
+      reason: "Mixed or multi-layer materials can't be recycled by most municipal systems — flagged honestly rather than overclaiming."
+    },
+    {
+      category: "wet",
+      label: "Wet / Organic",
+      keywords: ["banana","banana peel","peel","apple","orange","mango","grape","watermelon","papaya","guava","pineapple","fruit","vegetable","potato","onion","tomato","carrot","cabbage","spinach","leafy","cucumber","eggshell","egg shell","egg","tea leaves","tea bag","coffee ground","leftover food","food waste","garden waste","leaves","flower","plant waste","meat scrap","bone","fish waste","chicken waste","rice","bread","roti","chapati","pasta","noodles","cooked food","chocolate","candy","sweet","biscuit","cookie","cake","ice cream","peanut","cashew","almond","walnut","groundnut","nuts","milk","curd","yogurt","cheese","butter","paneer","snack","chips","namkeen"],
+      bin: "Wet waste / compost bin.",
+      reason: "Biodegradable material breaks down into compost instead of releasing methane in landfill."
+    },
+    {
+      category: "dry",
+      label: "Dry (low recyclability)",
+      keywords: ["plastic"],
+      bin: "General dry waste bin — check locally if it's a recyclable plastic type (PET/HDPE).",
+      reason: "Most mixed or unlabeled plastics have low recycling value in standard municipal systems."
+    },
+    {
+      category: "recyclable",
+      label: "Recyclable",
+      keywords: ["glass","metal","steel","aluminum foil sheet"],
+      bin: "Dry recyclable bin.",
+      reason: "Clean glass and metal are highly recyclable and commonly accepted by municipal recycling."
+    }
+  ];
+
+  function classify(text) {
+    const lower = ' ' + text.toLowerCase().trim() + ' ';
+    for (const rule of RULES) {
+      for (const kw of rule.keywords) {
+        if (lower.includes(kw)) {
+          return rule;
+        }
+      }
+    }
+    return null;
+  }
+
+  const messagesEl = document.getElementById('messages');
+  const form = document.getElementById('inputRow');
+  const input = document.getElementById('itemInput');
+  const chipsEl = document.getElementById('chips');
+  const statusDot = document.querySelector('.status-dot');
+  const photoBtn = document.getElementById('photoBtn');
+  const photoInput = document.getElementById('photoInput');
+
+  const catClass = {
+    wet: "cat-wet", recyclable: "cat-recyclable", dry: "cat-dry",
+    hazardous: "cat-hazardous", ewaste: "cat-ewaste", unknown: "cat-unknown", ai: "cat-ai"
+  };
+
+  const EC0SORT_SYSTEM_PROMPT = `You are EcoSort AI, a waste segregation assistant.
+When a user describes an item, respond with:
+1. Category: Wet / Dry / Recyclable / Hazardous / E-waste
+2. Correct bin/disposal method
+3. One-line reason (transparency)
+4. If uncertain, say so rather than guessing
+
+Keep answers short, clear, and locally practical.`;
+
+  // ---------- RAG-lite: retrieve grounding examples from the local rule/knowledge base ----------
+  // This is a small but real retrieval step: instead of asking Claude to classify
+  // cold, we first search our own keyword knowledge base for the closest-matching
+  // known items and pass them as grounding context, so the model's answer stays
+  // consistent with this project's own segregation rules rather than generic web knowledge.
+  function retrieveContext(text, topK) {
+    topK = topK || 5;
+    const words = text.toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);
+    const scored = [];
+    RULES.forEach(rule => {
+      rule.keywords.forEach(kw => {
+        const kwWords = kw.split(/[^a-z0-9]+/).filter(Boolean);
+        let score = 0;
+        kwWords.forEach(w => { if (words.includes(w)) score++; });
+        if (score > 0) scored.push({ kw: kw, rule: rule, score: score });
+      });
+    });
+    scored.sort((a, b) => b.score - a.score);
+    const seen = new Set();
+    const results = [];
+    for (const s of scored) {
+      const key = s.rule.label + ':' + s.kw;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      results.push(s);
+      if (results.length >= topK) break;
+    }
+    return results;
+  }
+
+  // ---------- Agentic tool: Claude can call this mid-answer to fetch practical next-step guidance ----------
+  const disposalCenterTool = {
+    name: "getDisposalCenterInfo",
+    description: "Given a waste category (Wet, Dry, Recyclable, Hazardous, or E-waste), returns general, honest guidance on where such items are typically collected. Call this once you've decided the category, to enrich your final answer with a practical next step.",
+    inputSchema: {
+      type: "object",
+      properties: { category: { type: "string" } },
+      required: ["category"]
+    },
+    execute: function(inputArgs) {
+      const map = {
+        "Hazardous": "Most municipalities run periodic hazardous-waste collection drives — check your local municipal corporation's website or app for the nearest drop-off date.",
+        "E-waste": "Authorized e-waste collection points are often at electronics retailers or via manufacturer take-back programs — search 'authorized e-waste collector' plus your city name.",
+        "Recyclable": "Look for the nearest dry-waste collection point or scrap dealer in your area — many municipal waste apps list drop-off points.",
+        "Dry": "General dry waste bin works, but for low-recyclability plastics, check for local eco-brick or plastic-collection initiatives.",
+        "Wet": "Home composting bins or municipal wet-waste collection is typically available — check for a local composting or biogas initiative."
+      };
+      return map[String(inputArgs.category)] || "Check your local municipal waste management guidelines for this category.";
+    }
+  };
+
+  const RESPONSE_SHAPE = '{"category":"Wet"|"Dry"|"Recyclable"|"Hazardous"|"E-waste","bin":"short disposal instruction","reason":"one-line reason","nextStep":"a practical next step, using the tool if helpful"}';
+
+  // Real AI fallback via the artifact's built-in "sample" capability (declared
+  // at publish time with capabilities: {sample: {}}). Resolves to null when
+  // unavailable — e.g. when this page is hosted plainly on GitHub Pages rather
+  // than viewed as a published claude.ai artifact — in which case the page
+  // still works perfectly on the rule engine alone, it just hides the AI button.
+  let sampleFn = null;
+  let aiReady = false;
+  let imagesSupported = false;
+  if (window.claude && typeof window.claude.use === 'function') {
+    window.claude.use('sample').then(function(s) {
+      sampleFn = s;
+      aiReady = !!s;
+      if (aiReady && statusDot) statusDot.textContent = 'Ready · AI fallback on';
+      if (aiReady) {
+        sampleFn.limits().then(function(limits) {
+          if (limits && limits.images) {
+            imagesSupported = true;
+            photoBtn.hidden = false;
+            if (limits.images.mediaTypes) photoInput.accept = limits.images.mediaTypes.join(',');
+          }
+        }).catch(function() {});
+      }
+    }).catch(function() { sampleFn = null; aiReady = false; });
+  }
+
+  function renderAIAnswer(result, containerBubble, itemLabelOverride) {
+    const tag = document.createElement('span');
+    const catKey = (result.category || '').toLowerCase().replace('-', '');
+    tag.className = 'cat-tag ' + (catClass[catKey] || 'cat-ai');
+    tag.textContent = (result.category || 'AI answer') + ' · AI';
+    containerBubble.appendChild(tag);
+
+    if (itemLabelOverride && result.item) {
+      const identified = document.createElement('div');
+      identified.style.fontWeight = '600';
+      identified.textContent = 'Identified: ' + result.item;
+      containerBubble.appendChild(identified);
+    }
+
+    const bin = document.createElement('div');
+    bin.textContent = result.bin || '';
+    containerBubble.appendChild(bin);
+
+    const reason = document.createElement('span');
+    reason.className = 'reason';
+    reason.textContent = 'Reason: ' + (result.reason || '');
+    containerBubble.appendChild(reason);
+
+    if (result.nextStep) {
+      const nextStep = document.createElement('div');
+      nextStep.style.marginTop = '0.4rem';
+      nextStep.style.fontSize = '0.85rem';
+      nextStep.style.color = 'var(--ink-soft)';
+      nextStep.textContent = '📍 ' + result.nextStep;
+      containerBubble.appendChild(nextStep);
+    }
+  }
+
+  async function askAI(itemText, buttonEl, containerBubble) {
+    buttonEl.disabled = true;
+    buttonEl.textContent = 'Thinking…';
+
+    const thinking = document.createElement('div');
+    thinking.className = 'ai-thinking';
+    thinking.textContent = 'Retrieving similar items…';
+    containerBubble.appendChild(thinking);
+
+    const context = retrieveContext(itemText, 5);
+    const contextText = context.length
+      ? "Similar known items from our knowledge base (use as grounding, don't just copy):\n" +
+        context.map(function(c) { return '- "' + c.kw + '" -> ' + c.rule.label + ': ' + c.rule.reason; }).join('\n')
+      : "No closely similar items found in the local knowledge base — classify from general knowledge.";
+
+    thinking.textContent = 'Asking Claude…';
+
+    const prompt = EC0SORT_SYSTEM_PROMPT + '\n\n' + contextText +
+      '\n\nItem to classify: "' + itemText + '"' +
+      '\n\nYou may call the getDisposalCenterInfo tool once you pick a category, to add a practical next step.' +
+      '\n\nRespond ONLY with JSON in this exact shape, no other text: ' + RESPONSE_SHAPE;
+
+    try {
+      const result = await sampleFn.json(prompt, { modelTier: 'quick', tools: [disposalCenterTool] });
+      thinking.remove();
+      buttonEl.remove();
+      renderAIAnswer(result, containerBubble, false);
+      scrollDown();
+    } catch (err) {
+      thinking.textContent = "Couldn't reach the AI just now — try again in a moment.";
+      buttonEl.disabled = false;
+      buttonEl.textContent = 'Ask AI';
+    }
+  }
+
+  async function askAIWithImage(file) {
+    const div = document.createElement('div');
+    div.className = 'msg bot';
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble';
+    const thinking = document.createElement('div');
+    thinking.className = 'ai-thinking';
+    thinking.textContent = 'Looking at the photo…';
+    bubble.appendChild(thinking);
+    div.appendChild(bubble);
+    messagesEl.appendChild(div);
+    scrollDown();
+
+    const prompt = EC0SORT_SYSTEM_PROMPT +
+      '\n\nLook at the attached photo and identify the waste item shown.' +
+      '\n\nYou may call the getDisposalCenterInfo tool once you pick a category, to add a practical next step.' +
+      '\n\nRespond ONLY with JSON in this exact shape, no other text: {"item":"what you see in the photo","category":"Wet"|"Dry"|"Recyclable"|"Hazardous"|"E-waste","bin":"short disposal instruction","reason":"one-line reason","nextStep":"a practical next step"}';
+
+    try {
+      const result = await sampleFn.json(prompt, { modelTier: 'quick', images: file, tools: [disposalCenterTool] });
+      thinking.remove();
+      renderAIAnswer(result, bubble, true);
+      scrollDown();
+    } catch (err) {
+      thinking.textContent = "Couldn't analyze that photo just now — try again, or describe the item instead.";
+    }
+  }
+
+  function addUserMessage(text) {
+    const div = document.createElement('div');
+    div.className = 'msg user';
+    div.innerHTML = '<div class="bubble"></div>';
+    div.querySelector('.bubble').textContent = text;
+    messagesEl.appendChild(div);
+    scrollDown();
+  }
+
+  function addUserImageMessage(file) {
+    const div = document.createElement('div');
+    div.className = 'msg user';
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble';
+    const label = document.createElement('div');
+    label.textContent = 'Photo uploaded';
+    bubble.appendChild(label);
+    const img = document.createElement('img');
+    img.className = 'msg-thumb';
+    img.src = URL.createObjectURL(file);
+    bubble.appendChild(img);
+    div.appendChild(bubble);
+    messagesEl.appendChild(div);
+    scrollDown();
+  }
+
+  function addBotMessage(rule, rawInput) {
+    const div = document.createElement('div');
+    div.className = 'msg bot';
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble';
+
+    if (rule) {
+      const tag = document.createElement('span');
+      tag.className = 'cat-tag ' + catClass[rule.category];
+      tag.textContent = rule.label;
+      bubble.appendChild(tag);
+
+      const bin = document.createElement('div');
+      bin.textContent = rule.bin;
+      bubble.appendChild(bin);
+
+      const reason = document.createElement('span');
+      reason.className = 'reason';
+      reason.textContent = 'Reason: ' + rule.reason;
+      bubble.appendChild(reason);
+    } else {
+      const tag = document.createElement('span');
+      tag.className = 'cat-tag cat-unknown';
+      tag.textContent = 'Not sure yet';
+      bubble.appendChild(tag);
+
+      const msg = document.createElement('div');
+      msg.textContent = 'I don\'t have a confident rule for "' + rawInput + '". Rather than guess, try describing the material (e.g. "plastic", "food scrap", "electronic"), its condition, or upload a photo.';
+      bubble.appendChild(msg);
+
+      if (aiReady) {
+        const askBtn = document.createElement('button');
+        askBtn.type = 'button';
+        askBtn.className = 'ask-ai-btn';
+        askBtn.textContent = 'Ask AI';
+        askBtn.addEventListener('click', function() { askAI(rawInput, askBtn, bubble); });
+        bubble.appendChild(askBtn);
+      }
+    }
+
+    div.appendChild(bubble);
+    messagesEl.appendChild(div);
+    scrollDown();
+  }
+
+  function scrollDown() {
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  }
+
+  function handleSubmit(text) {
+    if (!text.trim()) return;
+    addUserMessage(text);
+    const rule = classify(text);
+    setTimeout(() => addBotMessage(rule, text), 220);
+  }
+
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    const val = input.value;
+    input.value = '';
+    handleSubmit(val);
+  });
+
+  photoBtn.addEventListener('click', function() {
+    photoInput.click();
+  });
+  photoInput.addEventListener('change', function() {
+    const file = photoInput.files && photoInput.files[0];
+    if (!file) return;
+    addUserImageMessage(file);
+    askAIWithImage(file);
+    photoInput.value = '';
+  });
+
+  const examples = ["Used cooking oil", "Banana peel", "Old phone charger", "Chip packet", "Glass bottle", "Expired medicine", "Chocolate wrapper", "Peanut shells", "Broken umbrella", "Coconut shell", "Old shoes"];
+  examples.forEach(ex => {
+    const chip = document.createElement('button');
+    chip.type = 'button';
+    chip.className = 'chip';
+    chip.textContent = ex;
+    chip.addEventListener('click', () => handleSubmit(ex));
+    chipsEl.appendChild(chip);
+  });
+
+  // Welcome message
+  addBotMessage.call(null);
+  messagesEl.innerHTML = '';
+  const welcome = document.createElement('div');
+  welcome.className = 'msg bot';
+  welcome.innerHTML = `<div class="bubble">Hi! Describe any item — food scrap, packaging, electronics, anything — and I'll tell you which bin it belongs in and why. Try one of the examples below, or type your own.</div>`;
+  messagesEl.appendChild(welcome);
+})();
+</script>
+
+</body>
+</html>
