@@ -2,7 +2,7 @@
 
 **A hybrid rule-based + LLM assistant that tells you how to correctly dispose of any item — by text description or photo — built for the 1M1B AI for Sustainability Virtual Internship (in collaboration with IBM SkillsBuild & AICTE).**
 
-🔗 **Live demo:** [Add your published link here]
+🔗 **Live demo:** https://github.com/kmviswanadhan/Ecosort-Ai.git
 
 ---
 
@@ -55,7 +55,7 @@ EcoSort AI is a **hybrid system** — fast and free for common cases, genuinely 
 ## Running Locally
 
 ```bash
-git clone https://github.com/<your-username>/ecosort-ai.git
+git clone https://github.com/kmviswanadhan/Ecosort-Ai.git
 cd ecosort-ai
 open index.html   # or just double-click the file
 ```
@@ -67,7 +67,7 @@ No installation or API keys required. The rule engine works fully offline; AI/ph
 1. Push this repo to GitHub
 2. Go to **Settings → Pages**
 3. Set source to the `main` branch, root folder
-4. Your live demo will be at `https://<your-username>.github.io/ecosort-ai/`
+4. Your live demo will be at `https://github.com/kmviswanadhan/Ecosort-Ai.git`
 
 ## Expected Impact
 
