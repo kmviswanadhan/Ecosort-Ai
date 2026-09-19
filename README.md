@@ -2,7 +2,7 @@
 
 **A hybrid rule-based + LLM assistant that tells you how to correctly dispose of any item — by text description or photo — built for the 1M1B AI for Sustainability Virtual Internship (in collaboration with IBM SkillsBuild & AICTE).**
 
-🔗 **Live demo:** https://github.com/kmviswanadhan/Ecosort-Ai.git
+🔗 **Live demo:** https://kmviswanadhan.github.io/Ecosort-Ai/
 
 ---
 
