@@ -3,7 +3,8 @@
 **A hybrid rule-based + LLM assistant that tells you how to correctly dispose of any item — by text description or photo — built for the 1M1B AI for Sustainability Virtual Internship (in collaboration with IBM SkillsBuild & AICTE).**
 
 🔗 **Live demo:** https://kmviswanadhan.github.io/Ecosort-Ai/
-
+                  
+                  https://claude.ai/artifact/R9KMAF4V4R2z4mw2X7Q2cE
 ---
 
 ## The Problem
@@ -51,23 +52,6 @@ EcoSort AI is a **hybrid system** — fast and free for common cases, genuinely 
 - Plain HTML, CSS, and JavaScript — no build step, no framework, no external dependencies
 - LLM: Claude, accessed via the artifact's built-in `sample` capability (no API key needed in the hosted demo)
 - Development assisted using **IBM Bob** (IBM SkillsBuild's AI development partner)
-
-## Running Locally
-
-```bash
-git clone https://github.com/kmviswanadhan/Ecosort-Ai.git
-cd ecosort-ai
-open index.html   # or just double-click the file
-```
-
-No installation or API keys required. The rule engine works fully offline; AI/photo features only activate when opened as the published Claude artifact (see the live demo link above).
-
-## Deploying (GitHub Pages)
-
-1. Push this repo to GitHub
-2. Go to **Settings → Pages**
-3. Set source to the `main` branch, root folder
-4. Your live demo will be at `https://github.com/kmviswanadhan/Ecosort-Ai.git`
 
 ## Expected Impact
 
